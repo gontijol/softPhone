@@ -2,6 +2,9 @@
 
 Este é um projeto de um Softphone desenvolvido em Flutter, projetado para rodar em dispositivos Android. O Softphone utiliza o protocolo SIP com WebSocket, implementado por meio de uma interface que converte UDP para WebSocket em JavaScript.
 
+![image](https://github.com/gontijol/softPhone/assets/64325773/11f362a0-237b-40c0-a2f7-638c60ff941e)
+
+
 ## Funcionalidades
 
 - Realizar e receber chamadas telefônicas através do servidor Issabel.
