@@ -10,7 +10,7 @@ Este é um projeto de um Softphone desenvolvido em Flutter, projetado para rodar
 
 ## Requisitos
 
-- Flutter SDK (vX.X.X): [link para download](https://flutter.dev)
+- Flutter SDK (>=2.12.0): [link para download](https://flutter.dev)
 - Dispositivo Android ou emulador para testar o aplicativo.
 
 ## Instalação
