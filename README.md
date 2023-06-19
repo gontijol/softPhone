@@ -26,7 +26,7 @@ git clone https://github.com/seu-usuario/seu-projeto.git``
 
 3. Execute o seguinte comando para instalar as dependências do Flutter:
 
-```flutter pub get```
+``flutter pub get``
 
 4. Instale e configure o servidor Issabel para se comunicar com o Softphone.
 
