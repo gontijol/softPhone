@@ -17,8 +17,8 @@ Este é um projeto de um Softphone desenvolvido em Flutter, projetado para rodar
 
 1. Clone este repositório em sua máquina local:
 
-```bash
-git clone https://github.com/seu-usuario/seu-projeto.git```
+``bash
+git clone https://github.com/seu-usuario/seu-projeto.git``
 
 2. Navegue até o diretório do projeto:
 
