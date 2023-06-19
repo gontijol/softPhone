@@ -37,17 +37,17 @@ Este é um projeto de um Softphone desenvolvido em Flutter, projetado para rodar
 
 8. No código-fonte do projeto, localize o arquivo lib/config.dart e atualize as informações de configuração de acordo com seu ambiente:
 
-``const String issabelServer = 'endereço_do_servidor_issabel';
+```const String issabelServer = 'endereço_do_servidor_issabel';
 const String sipUsername = 'nome_de_usuário_sip';
 const String sipPassword = 'senha_sip';
 const String websocketUDPUrl = 'url_da_interface_websocketUDP';
-``
+```
 
 9. Conecte seu dispositivo Android ou inicie um emulador.
 
 10. Execute o aplicativo Flutter:
 
-```flutter run````
+``flutter run``
 
 ## Notas importantes
 - Este projeto ainda está incompleto e requer alguns ajustes para estar totalmente funcional.
