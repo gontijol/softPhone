@@ -17,12 +17,11 @@ Este é um projeto de um Softphone desenvolvido em Flutter, projetado para rodar
 
 1. Clone este repositório em sua máquina local:
 
-``bash
-git clone https://github.com/seu-usuario/seu-projeto.git``
+``git clone https://github.com/seu-usuario/seu-projeto.git``
 
 2. Navegue até o diretório do projeto:
 
-```cd seu-projeto```
+``cd seu-projeto``
 
 3. Execute o seguinte comando para instalar as dependências do Flutter:
 
@@ -38,11 +37,11 @@ git clone https://github.com/seu-usuario/seu-projeto.git``
 
 8. No código-fonte do projeto, localize o arquivo lib/config.dart e atualize as informações de configuração de acordo com seu ambiente:
 
-```const String issabelServer = 'endereço_do_servidor_issabel';
+``const String issabelServer = 'endereço_do_servidor_issabel';
 const String sipUsername = 'nome_de_usuário_sip';
 const String sipPassword = 'senha_sip';
 const String websocketUDPUrl = 'url_da_interface_websocketUDP';
-```
+``
 
 9. Conecte seu dispositivo Android ou inicie um emulador.
 
