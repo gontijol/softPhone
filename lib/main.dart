@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:smartphone/pages/home/page.dart';
+import 'package:smartphone/pages/register/binding.dart';
+import 'package:smartphone/pages/routes/routes.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,10 +21,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/',
-      getPages: [
-        GetPage(name: '/', page: () => const HomePage()),
-      ],
+      initialRoute: '/register',
+      getPages: AppRoutes.pages,
+      initialBinding: RegisterBinding(),
     );
   }
 }

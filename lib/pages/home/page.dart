@@ -271,62 +271,90 @@ class HomePage extends GetView<HomeController> {
           ),
           child: IconButton(
               onPressed: () {
+                // Get.bottomSheet(
+                //   SingleChildScrollView(
+                //     child: Container(
+                //       height: Get.height * 0.7,
+                //       color: defaultWhite,
+                //       child: Column(
+                //         children: [
+                //           SizedBox(width: 0.8, child: TextFormField()),
+                //           TextFormField(),
+                //           TextFormField(),
+                //           TextFormField(),
+                //         ],
+                //       ),
+                //     ),
+                //   ),
+                // );
+
                 Get.bottomSheet(
-                  SingleChildScrollView(
+                  Opacity(
+                    opacity: 0.92,
                     child: Container(
-                      height: Get.height * 0.7,
-                      color: defaultWhite,
+                      width: Get.width,
+                      color: defaultCyan,
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          SizedBox(width: 0.8, child: TextFormField()),
-                          TextFormField(),
-                          TextFormField(),
-                          TextFormField(),
+                          const Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Text(
+                              'Lista de Contatos',
+                              style: TextStyle(
+                                color: defaultBlack,
+                                fontSize: 24.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: controller.contacts.length,
+                              itemBuilder: (context, index) {
+                                final contact = controller.contacts[index];
+
+                                return ListTile(
+                                  title: Text(
+                                    contact.name,
+                                    style: const TextStyle(
+                                      color: defaultBlack,
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    contact.phoneNumber,
+                                    style: const TextStyle(
+                                      color: defaultBlack,
+                                      fontSize: 12.0,
+                                      fontWeight: FontWeight.w300,
+                                    ),
+                                  ),
+                                  isThreeLine: true,
+                                  trailing: IconButton(
+                                    onPressed: () {
+                                      // Ação a ser executada ao selecionar um contato
+                                      print(
+                                          'Contato selecionadosss: ${contact.name}');
+                                    },
+                                    icon: const Icon(Icons.call),
+                                    color: defaultBlack,
+                                  ),
+                                  onTap: () {
+                                    // Ação a ser executada ao selecionar um contato
+                                    print(
+                                        'Contato selecionado: ${contact.name}');
+                                  },
+                                );
+                              },
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ),
                 );
-
-                // Get.bottomSheet(
-                //   Container(
-                //     width: Get.width,
-                //     color: Colors.white,
-                //     child: Column(
-                //       crossAxisAlignment: CrossAxisAlignment.stretch,
-                //       children: [
-                //         const Padding(
-                //           padding: EdgeInsets.all(16.0),
-                //           child: Text(
-                //             'Lista de Contatos',
-                //             style: TextStyle(
-                //               color: Colors.black,
-                //               fontSize: 24.0,
-                //               fontWeight: FontWeight.bold,
-                //             ),
-                //           ),
-                //         ),
-                //         Expanded(
-                //           child: ListView.builder(
-                //             itemCount: controller.contacts.length,
-                //             itemBuilder: (context, index) {
-                //               final contact = controller.contacts[index];
-
-                //               return ListTile(
-                //                 title: Text(contact.name),
-                //                 subtitle: Text(contact.phoneNumber),
-                //                 onTap: () {
-                //                   // Ação a ser executada ao selecionar um contato
-                //                   print('Contato selecionado: ${contact.name}');
-                //                 },
-                //               );
-                //             },
-                //           ),
-                //         ),
-                //       ],
-                //     ),
-                //   ),
-                // );
               },
               iconSize: 40,
               icon: const Icon(Icons.contacts),

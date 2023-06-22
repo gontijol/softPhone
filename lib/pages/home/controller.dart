@@ -1,9 +1,13 @@
 import 'dart:async';
+// import 'dart:html';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:get/get.dart';
 import 'package:sip_ua/sip_ua.dart';
 
-class HomeController extends GetxController {
+class HomeController extends GetxController implements SipUaHelperListener {
+  final incomingCallStream = ''.obs;
+
   final numeroController = ''.obs;
   final pressedNumber = ''.obs;
   final minFontSize = 14.0.obs;
@@ -16,106 +20,79 @@ class HomeController extends GetxController {
   final timerText = ''.obs;
   final minutes = ''.obs;
   final seconds = ''.obs;
-  final ipConnect = '192.168.1.13'.obs;
   final UaSettings settings = UaSettings();
-  final port = '5060';
-  RTCPeerConnection? _peerConnection;
-  late SIPUAHelper _sipHelper; // Adicionado
-
-  final rtcOfferConstraints = <String, dynamic>{
-    'offerToReceiveAudio': true,
-    'offerToReceiveVideo': false,
-  };
-
+  late SIPUAHelper sipHelper; // Adicionado
+  final mediaConstraints = <String, dynamic>{'audio': true, 'video': true};
   StreamSubscription? _timerSubscription;
-
   @override
   void onInit() async {
-    _sipHelper = SIPUAHelper(); // Inicializar SIPUAHelper
-    // final websocketUrl = 'ws://${ipConnect.value}:5060';
-    // final channel = IOWebSocketChannel.connect(websocketUrl);
-    // channel.stream.handleError((error) {
-    //   print('Erro no WebSocket: $error');
-    // });
-    // channel.stream.listen((message) {
-    //   print('Mensagem recebida: $message');
-    //   channel.sink.add('received!');
-    //   // Processar a mensagem recebida do WebSocket
-    //   // ... (faça o que for necessário com a mensagem)
-    // });
-
-    await registrar();
+    sipHelper = SIPUAHelper(); // Inicializar SIPUAHelper
     super.onInit();
   }
-
-  registrar() async {
-    // Construir as credenciais
-    final credentials = {
-      'uri': 'sip:1000@${ipConnect.value}:5060',
-      'username': '1000',
-      'password': 'F0rget96',
-      'realm': '${ipConnect.value}:$port',
-      'wss': 'ws://${ipConnect.value}:8080/ws'
-    };
-    settings.webSocketUrl = 'ws://192.168.1.10:8080/ws';
-    settings.uri = credentials['uri'];
-    settings.webSocketSettings = WebSocketSettings();
-    settings.webSocketSettings.allowBadCertificate = true;
-    settings.webSocketSettings.userAgent = 'Dart/2.12 (dart:io)';
-    settings.register = true;
-    settings.authorizationUser = credentials['username'];
-    settings.password = credentials['password'];
-    settings.displayName = credentials['username'];
-    settings.userAgent = 'Dart SIP Client v1.0.0';
-    settings.dtmfMode = DtmfMode.RFC2833;
-    settings.ha1 = null;
-    settings.webSocketSettings.allowBadCertificate = true;
-
-    await _sipHelper.start(settings);
-    print(_sipHelper.toString());
-    print(settings.toString());
-  }
-
-  // _initWebRTC() async {
-  //   try {
-  //     _peerConnection = await createPeerConnection({'iceServers': []}, {});
-  //     print('WebRTC initialized successfully.');
-  //   } catch (error) {
-  //     print('Failed to initialize WebRTC: $error');
-  //   }
-  // }
 
   void setPressedNumber(String number) {
     pressedNumber.value = number;
   }
 
   void fazerChamada(String destino) async {
+    bool voiceOnly = true;
     await Future.delayed(const Duration(seconds: 1));
+    MediaStream? mediaStream;
 
+    if (kIsWeb && voiceOnly) {
+      mediaStream = await mediaDevices.getDisplayMedia(mediaConstraints);
+      mediaConstraints['video'] = false;
+      MediaStream userStream =
+          await mediaDevices.getUserMedia(mediaConstraints);
+      mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
+    } else {
+      mediaConstraints['video'] = !voiceOnly;
+      mediaStream = await mediaDevices.getUserMedia(mediaConstraints);
+    }
+    void answerCall() {
+      // Verifica se há uma chamada recebida
+      if (incomingCallStream.value.isNotEmpty) {
+        print('Atendendo chamada: ${incomingCallStream.value}');
+
+        // Restaurar o valor da stream para vazio após atender a chamada
+        incomingCallStream.value = '';
+      }
+    }
+
+    sipHelper.call(destino, voiceonly: voiceOnly, mediaStream: mediaStream);
+    // return null;
     if (isCallActive.value == false) {
       isCallActive.value = true;
       callDuration.value = const Duration(seconds: 0);
 
       startCallTimer();
       // // Construir a URI SIP
-      final sipUri = 'sip:$destino@${ipConnect.value}:5060';
-      await _sipHelper.call(sipUri); // Enviar a chamada SIP
-      _sipHelper.register();
 
-      // // Configurar as opções para o PeerConnection
-
-      // // Criar a oferta de chamada
-      final offer = await _peerConnection!.createOffer(rtcOfferConstraints);
-
-      // // Definir a oferta local
-      await _peerConnection!.setLocalDescription(offer);
-
-      // Enviar a oferta SIP e as credenciais para o destino da chamada
-
-      // Aguardar a resposta do destino (por exemplo, servidor SIP)
-      // Aqui você precisa receber a resposta SIP e passá-la para o método setRemoteDescription
+      await sipHelper.call(destino); // Enviar a chamada SIP
+      sipHelper.register();
     } else {
       endCallTimer();
+    }
+  }
+
+  @override
+  void registrationStateChanged(RegistrationState state) {
+    print('Registration state changed: ${state.toString()}');
+    // setState(() {});
+  }
+
+  @override
+  void transportStateChanged(TransportState state) {
+    print('TransportState state changed: ${state.toString()}');
+  }
+
+  @override
+  void callStateChanged(Call call, CallState callState) {
+    if (callState.state == CallStateEnum.CALL_INITIATION) {
+      Get.toNamed('/call-screen');
+    }
+    if (callState.state == CallStateEnum.CONNECTING) {
+      // Get.toNamed('/call-screen');
     }
   }
 
@@ -180,8 +157,18 @@ class HomeController extends GetxController {
   void dispose() {
     _timerSubscription?.cancel();
     _timerSubscription = null;
-    _peerConnection?.dispose();
+    // _peerConnection?.dispose();
     super.dispose();
+  }
+
+  @override
+  void onNewMessage(SIPMessageRequest msg) {
+    // TODO: implement onNewMessage
+  }
+
+  @override
+  void onNewNotify(Notify ntf) {
+    // TODO: implement onNewNotify
   }
 }
 
