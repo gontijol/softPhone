@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sip_ua/sip_ua.dart';
 import 'package:smartphone/core/colors.dart';
-import 'package:smartphone/pages/home/controller.dart';
+import 'package:smartphone/pages/dialpad/controller.dart';
 
 class RegisterController extends GetxController implements SipUaHelperListener {
   final ipConnect = '192.168.1.150'.obs;
@@ -11,9 +11,12 @@ class RegisterController extends GetxController implements SipUaHelperListener {
   final password = TextEditingController().obs;
   final realm = TextEditingController().obs;
   final isRegistrationSuccessful = false.obs;
-  final phoneController = Get.find<HomeController>();
+  final phoneController = Get.find<DialPadController>();
   final stateConnection = RegistrationStateEnum.UNREGISTERED.obs;
   final isRegistering = false.obs;
+  final hold = false.obs;
+  final state = CallStateEnum.NONE.obs;
+  final holdOriginator = ''.obs;
   @override
   void onInit() async {
     sipHelper = SIPUAHelper();
@@ -27,6 +30,8 @@ class RegisterController extends GetxController implements SipUaHelperListener {
   startingRegister() async {
     await phoneController.sipHelper.start(phoneController.settings);
     isRegistering.value = true;
+
+    // DELAYED NECESSÁRIO PARA ESPERAR O REGISTRO
     Future.delayed(const Duration(seconds: 3), () {
       registrationStateChanged(sipHelper.registerState);
       Future.delayed(
@@ -56,7 +61,7 @@ class RegisterController extends GetxController implements SipUaHelperListener {
   }
 
   @override
-  void callStateChanged(Call call, CallState state) {
+  void callStateChanged(Call call, CallState callState) {
     // TODO: implement callStateChanged
   }
 
@@ -67,7 +72,8 @@ class RegisterController extends GetxController implements SipUaHelperListener {
 
   @override
   void onNewNotify(Notify ntf) {
-    // TODO: implement onNewNotify
+    print('onNewNotify ${ntf.request.toString()}');
+    // ntf.request.toString();
   }
 
   @override

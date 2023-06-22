@@ -38,6 +38,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   http: ^0.13.3
   get: ^4.6.5
+  glassmorphism:
+  flutter_boxicons:
   # td_sip_plugin: ^0.0.9
   flutter_background_service: ^2.4.6
   flutter_webrtc: 
@@ -45,6 +47,8 @@ dependencies:
   logger: ^1.4.0
   web_socket_channel: ^2.4.0
   fluttertoast: ^8.2.2
+  mask_text_input_formatter: ^2.4.0
+  intl: ^0.18.1
   # janus_client: ^2.2.15
   # web_socket_channel: ^2.4.0
   # flutter_webrtc: ^0.9.32
@@ -74,6 +78,11 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+        - assets/images/splash2.png
+        - assets/
+        - assets/images/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

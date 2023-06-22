@@ -1,29 +1,20 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sip_ua/sip_ua.dart';
-import 'package:smartphone/pages/call_screen/controller.dart';
+import 'package:smartphone/core/colors.dart';
+// import 'package:smartphone/pages/call_screen/controller.dart';
 
-class CallView extends GetView<CallController> {
+class CallView extends GetView {
   const CallView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-            automaticallyImplyLeading: false,
-            title: Text(
-                '[${controller.direction}] ${EnumHelper.getName(controller.state)}')),
-        body: Container(
-          child: controller.buildContent(),
+      body: Container(
+        color: defaultBlue,
+        child: const Center(
+          child: Text('CallView'),
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: Padding(
-            padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 24.0),
-            child: SizedBox(
-              width: 320,
-              child: controller.buildActionButtons(),
-            )));
+      ),
+    );
   }
 }
