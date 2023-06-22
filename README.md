@@ -4,31 +4,30 @@ Este é um projeto de um Softphone desenvolvido em Flutter, projetado para rodar
 
 ![image](https://github.com/gontijol/softPhone/assets/64325773/11f362a0-237b-40c0-a2f7-638c60ff941e)
 
-
 ## Funcionalidades
 
-- Realizar e receber chamadas telefônicas através do servidor Issabel.
-- Interface de usuário intuitiva e fácil de usar.
-- Suporte a protocolo SIP com WebSocket para comunicação eficiente.
+-   Realizar e receber chamadas telefônicas através do servidor Issabel.
+-   Interface de usuário intuitiva e fácil de usar.
+-   Suporte a protocolo SIP com WebSocket para comunicação eficiente.
 
 ## Requisitos
 
-- Flutter SDK (>=2.12.0): [link para download](https://flutter.dev)
-- Dispositivo Android ou emulador para testar o aplicativo.
+-   Flutter SDK (>=2.12.0): [link para download](https://flutter.dev)
+-   Dispositivo Android ou emulador para testar o aplicativo.
 
 ## Instalação
 
 1. Clone este repositório em sua máquina local:
 
-``git clone https://github.com/seu-usuario/seu-projeto.git``
+`git clone https://github.com/seu-usuario/seu-projeto.git`
 
 2. Navegue até o diretório do projeto:
 
-``cd seu-projeto``
+`cd seu-projeto`
 
 3. Execute o seguinte comando para instalar as dependências do Flutter:
 
-``flutter pub get``
+`flutter pub get`
 
 4. Instale e configure o servidor Issabel para se comunicar com o Softphone.
 
@@ -50,12 +49,13 @@ const String websocketUDPUrl = 'url_da_interface_websocketUDP';
 
 10. Execute o aplicativo Flutter:
 
-``flutter run``
+`flutter run`
 
 ## Notas importantes
-- Este projeto ainda está incompleto e requer alguns ajustes para estar totalmente funcional.
-- Certifique-se de ter uma conexão estável com a internet ao executar o aplicativo.
-- Se encontrar algum problema ou tiver alguma dúvida, sinta-se à vontade para entrar em contato com a equipe de desenvolvimento.
+
+-   Este projeto ainda está incompleto e requer alguns ajustes para estar totalmente funcional.
+-   Certifique-se de ter uma conexão estável com a internet ao executar o aplicativo.
+-   Se encontrar algum problema ou tiver alguma dúvida, sinta-se à vontade para entrar em contato com a equipe de desenvolvimento.
 
 ## Contribuição
 
@@ -65,5 +65,22 @@ Contribuições são bem-vindas! Se você quiser melhorar este projeto, siga as 
 
 2. Crie uma nova branch com a sua contribuição:
 
-```git checkout -b minha-contribuicao```
+`git checkout -b minha-contribuicao`
 
+## Atualizaçào 0.1.0
+
+Removida abstração de camada desnecessária Jssip
+
+Configuração necessária no Issabel - Asterisk:
+
+1. Defina um IP Estático
+
+2. Clique em PBX > Ferramentas > Editor de Arquivos do Asterisk
+
+3. procure pelo arquivo http_custom.conf
+
+4. Defina seu IP
+   `bindaddr=[SEU IP ESTÁTICO]
+   bindport=8089`
+
+5. Salve e reinicie o Issabel
