@@ -67,7 +67,7 @@ Contribuições são bem-vindas! Se você quiser melhorar este projeto, siga as 
 
 `git checkout -b minha-contribuicao`
 
-## Atualizaçào 0.1.0
+## Atualização 0.1.0
 
 Removida abstração de camada desnecessária Jssip
 
