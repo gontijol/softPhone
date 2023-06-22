@@ -114,10 +114,10 @@ class DialPadController extends GetxController implements SipUaHelperListener {
     // return null;
 
     if (isCallActive.value == false) {
-      callStateChanged(
-        Call(destino, call.session, CallStateEnum.CALL_INITIATION),
-        CallState(callStateValue!),
-      );
+      // callStateChanged(
+      //   Call(destino, call.session, CallStateEnum.CALL_INITIATION),
+      //   CallState(callStateValue!),
+      // );
       isCallActive.value = true;
       callDuration.value = const Duration(seconds: 0);
       startCallTimer();
@@ -178,8 +178,11 @@ class DialPadController extends GetxController implements SipUaHelperListener {
   }
 
   endCall() {
-    print(sipHelper.findCall(currentCallId!));
-    sipHelper.findCall(currentCallId!)?.hangup();
+    // sipHelper.on(, (event) {});
+    //TODO: IMPLEMENTAR O END CALL
+
+    // print(sipHelper.findCall(currentCallId!.toString()));
+    // sipHelper.findCall(currentCallId!)?.hangup();
   }
 
   void endCallTimer() async {
