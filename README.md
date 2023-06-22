@@ -80,7 +80,7 @@ Configuração necessária no Issabel - Asterisk:
 3. procure pelo arquivo http_custom.conf
 
 4. Defina seu IP
-   `bindaddr=[SEU IP ESTÁTICO]
-   bindport=8089`
+   ```bindaddr=[SEU IP ESTÁTICO]
+   bindport=8089```
 
 5. Salve e reinicie o Issabel
