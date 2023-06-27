@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 // import 'dart:html';
 import 'package:flutter/foundation.dart';
@@ -24,7 +26,6 @@ class DialPadController extends GetxController implements SipUaHelperListener {
   final seconds = ''.obs;
   final UaSettings settings = UaSettings();
 
-  // Call? get Call => call;
   final RTCVideoRenderer localRenderer = RTCVideoRenderer();
   final RTCVideoRenderer remoteRenderer = RTCVideoRenderer();
   MediaStream? localStream;
@@ -39,10 +40,14 @@ class DialPadController extends GetxController implements SipUaHelperListener {
   final videoMuted = false.obs;
   final speakerOn = false.obs;
   final hold = false.obs;
+  final hasListener = false.obs;
   final holdOriginator = ''.obs;
   final state = CallStateEnum.NONE.obs;
-  late Call call = Call('', call.session, state.value);
-  // SIPUAHelper? get helper => widget._helper;
+
+  RTCSessionDescription? localSdp;
+
+  late Call call;
+  Call? get currentCall => call;
 
   bool get voiceOnly =>
       (localStream == null || localStream!.getVideoTracks().isEmpty) &&
@@ -50,28 +55,40 @@ class DialPadController extends GetxController implements SipUaHelperListener {
 
   String? get remoteIdentify => call.remote_identity;
 
-  String? get direction => call.direction;
+  // RTCSessionDescription? get remoteSdp =>
 
-  Call? get currentCall => call;
+  String? get direction => currentCall!.direction;
 
-  String? get currentCallId => call.id;
+  CallState? callState;
 
-  CallStateEnum? get callStateValue => call.state;
+  String? get currentCallId => currentCall!.id;
 
-  late SIPUAHelper sipHelper; // Adicionado
+  CallStateEnum? get callStateValue => currentCall!.state;
+
   final mediaConstraints = <String, dynamic>{'audio': true, 'video': true};
   StreamSubscription? _timerSubscription;
+  late final SIPUAHelper? sipHelper = SIPUAHelper(); // Inicializar SIPUAHelper
+
   @override
   void onInit() async {
+    // session
     // call = Get.find<Call>();
     Get.lazyPut(() => CallController());
-    sipHelper = SIPUAHelper(); // Inicializar SIPUAHelper
+
+    sipHelper!.addSipUaHelperListener(this);
+    // print('listener${sipHelper.hasListeners.call}'); // Adicionar listener
     super.onInit();
+    // callStateChanged(call, CallStateEnum.NONE);
     // print(callStateValue);
   }
 
   void setPressedNumber(String number) {
     pressedNumber.value = number;
+  }
+
+  listener() async {
+    sipHelper!.findCall(currentCall!.id!); // Adicionar listener
+    sipHelper!.addSipUaHelperListener(this); // Adicionar listener
   }
 
   initCall() async {
@@ -80,9 +97,9 @@ class DialPadController extends GetxController implements SipUaHelperListener {
 
   void handleHold() {
     if (hold.value) {
-      call.unhold();
+      currentCall?.unhold();
     } else {
-      call.hold();
+      currentCall?.hold();
     }
   }
 
@@ -101,15 +118,16 @@ class DialPadController extends GetxController implements SipUaHelperListener {
       mediaConstraints['video'] = !voiceOnly;
       mediaStream = await mediaDevices.getUserMedia(mediaConstraints);
     }
-    // void answerCall() {
-    //   // Verifica se há uma chamada recebida
-    //   if (incomingCallStream.value.isNotEmpty) {
-    //     print('Atendendo chamada: ${incomingCallStream.value}');
+    void answerCall() {
+      // Verifica se há uma chamada recebida
 
-    //     // Restaurar o valor da stream para vazio após atender a chamada
-    //     incomingCallStream.value = '';
-    //   }
-    // }
+      if (incomingCallStream.value.isNotEmpty) {
+        print('Atendendo chamada: ${incomingCallStream.value}');
+
+        // Restaurar o valor da stream para vazio após atender a chamada
+        incomingCallStream.value = '';
+      }
+    }
 
     // return null;
 
@@ -121,10 +139,18 @@ class DialPadController extends GetxController implements SipUaHelperListener {
       isCallActive.value = true;
       callDuration.value = const Duration(seconds: 0);
       startCallTimer();
-      await sipHelper.call(destino,
+      await sipHelper!.call(destino,
           voiceonly: voiceOnly,
           mediaStream: mediaStream); // Enviar a chamada SIP
-      sipHelper.register();
+      sipHelper!.register();
+      print('state changed');
+      callStateChanged(
+        currentCall!,
+        callState!,
+      );
+
+      print('debugzoado $callStateValue');
+      print('state changed done');
 
       print('Chamada iniciada');
       // print('Chamada iniciada: ${call.id}');
@@ -312,8 +338,13 @@ class DialPadController extends GetxController implements SipUaHelperListener {
 
   @override
   void onNewNotify(Notify ntf) {
-    // TODO: implement onNewNotify
+    print(ntf.request);
   }
+
+  // Exemplo de uso do EventCallState
+// on(Function() EventCallState, (EventCallState event) {
+//   // Lógica para lidar com o evento EventCallState
+// });
 }
 
 class Contact {
@@ -323,3 +354,7 @@ class Contact {
 
   Contact({required this.name, required this.phoneNumber, this.onPressed});
 }
+
+// class EventCallState implements EventType {
+//   // Aqui você pode adicionar propriedades e métodos específicos do evento EventCallState
+// }

@@ -183,9 +183,9 @@ class RegisterView extends GetView<RegisterController> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               SizedBox(
-                                width: Get.width * 0.55,
-                                child:
-                                    Image.asset('assets/images/logo-atma.png'),
+                                width: Get.width * 0.50,
+                                child: Image.asset(
+                                    'assets/images/logo-antiga.png'),
                               ),
                               const SizedBox(height: 40),
                               Obx(

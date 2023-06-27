@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:sip_ua/sip_ua.dart';
 
-class CallController extends GetxController {
+class CallController extends GetxController implements SipUaHelperListener {
   // String? get remoteIdentity => call!.remote_identity;
 
   // String get direction => call!.direction;
@@ -50,5 +50,10 @@ class CallController extends GetxController {
   @override
   void transportStateChanged(TransportState state) {
     // TODO: implement transportStateChanged
+  }
+
+  @override
+  void callStateChanged(Call call, CallState state) {
+    // TODO: implement callStateChanged
   }
 }

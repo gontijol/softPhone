@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:get/get.dart';
 import 'package:sip_ua/sip_ua.dart';
 import 'package:smartphone/core/colors.dart';
@@ -6,7 +7,6 @@ import 'package:smartphone/pages/dialpad/controller.dart';
 
 class RegisterController extends GetxController implements SipUaHelperListener {
   final ipConnect = '192.168.1.150'.obs;
-  late SIPUAHelper sipHelper;
   final userName = TextEditingController().obs;
   final password = TextEditingController().obs;
   final realm = TextEditingController().obs;
@@ -16,11 +16,11 @@ class RegisterController extends GetxController implements SipUaHelperListener {
   final isRegistering = false.obs;
   final hold = false.obs;
   final state = CallStateEnum.NONE.obs;
+
+  // RTCSessionDescription offer = RTCSessionDescription('', '');
   final holdOriginator = ''.obs;
   @override
   void onInit() async {
-    sipHelper = SIPUAHelper();
-    phoneController.sipHelper = sipHelper;
     password.value.text = 'F0rget96';
     userName.value.text = '1001';
     realm.value.text = '1001';
@@ -28,12 +28,12 @@ class RegisterController extends GetxController implements SipUaHelperListener {
   }
 
   startingRegister() async {
-    await phoneController.sipHelper.start(phoneController.settings);
+    await phoneController.sipHelper?.start(phoneController.settings);
     isRegistering.value = true;
 
     // DELAYED NECESSÁRIO PARA ESPERAR O REGISTRO
     Future.delayed(const Duration(seconds: 3), () {
-      registrationStateChanged(sipHelper.registerState);
+      registrationStateChanged(phoneController.sipHelper!.registerState);
       Future.delayed(
           const Duration(seconds: 1), () => isRegistering.value = false);
     });
