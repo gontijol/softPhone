@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:get/get.dart';
 import 'package:sip_ua/sip_ua.dart';
 import 'package:smartphone/core/colors.dart';

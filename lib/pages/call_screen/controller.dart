@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:get/get.dart';
 import 'package:sip_ua/sip_ua.dart';
 
