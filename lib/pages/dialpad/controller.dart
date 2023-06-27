@@ -334,7 +334,7 @@ class DialPadController extends GetxController implements SipUaHelperListener {
             Container(
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(30.0),
+                  topLeft: Radius.circular(30.0),
                 ),
                 color: defaultBlack.withOpacity(0.6),
               ),
@@ -362,6 +362,9 @@ class DialPadController extends GetxController implements SipUaHelperListener {
                           InkWell(
                             onTap: () {
                               Get.back();
+                              caller.state == CallStateEnum.PROGRESS
+                                  ? caller.answer(mediaConstraints)
+                                  : caller.answer(mediaConstraints);
                               caller.answer(mediaConstraints);
                             },
                             borderRadius: BorderRadius.circular(32.0),
