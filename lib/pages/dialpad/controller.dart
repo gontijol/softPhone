@@ -7,11 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:get/get.dart';
 import 'package:sip_ua/sip_ua.dart';
+import 'package:smartphone/core/colors.dart';
 import 'package:smartphone/pages/call_screen/controller.dart';
+import 'package:smartphone/pages/dialpad/widgets/answer_call.dart';
 
 class DialPadController extends GetxController implements SipUaHelperListener {
   final incomingCallStream = ''.obs;
-
+  final answerCall = false.obs;
+  final originatorCallStream = ''.obs;
   final numeroController = ''.obs;
   final pressedNumber = ''.obs;
   final minFontSize = 14.0.obs;
@@ -46,14 +49,15 @@ class DialPadController extends GetxController implements SipUaHelperListener {
 
   RTCSessionDescription? localSdp;
 
-  late Call call;
-  Call? get currentCall => call;
+  late Call caller;
+
+  Call? get currentCall => caller;
 
   bool get voiceOnly =>
       (localStream == null || localStream!.getVideoTracks().isEmpty) &&
       (remoteStream == null || remoteStream!.getVideoTracks().isEmpty);
 
-  String? get remoteIdentify => call.remote_identity;
+  String? get remoteIdentify => caller.remote_identity;
 
   // RTCSessionDescription? get remoteSdp =>
 
@@ -65,7 +69,7 @@ class DialPadController extends GetxController implements SipUaHelperListener {
 
   CallStateEnum? get callStateValue => currentCall!.state;
 
-  final mediaConstraints = <String, dynamic>{'audio': true, 'video': true};
+  final mediaConstraints = <String, dynamic>{'audio': true, 'video': false};
   StreamSubscription? _timerSubscription;
   late final SIPUAHelper? sipHelper = SIPUAHelper(); // Inicializar SIPUAHelper
 
@@ -104,6 +108,7 @@ class DialPadController extends GetxController implements SipUaHelperListener {
   }
 
   void fazerChamada(String destino) async {
+    originatorCallStream.value = destino;
     bool voiceOnly = true;
     await Future.delayed(const Duration(seconds: 1));
     MediaStream? mediaStream;
@@ -118,36 +123,23 @@ class DialPadController extends GetxController implements SipUaHelperListener {
       mediaConstraints['video'] = !voiceOnly;
       mediaStream = await mediaDevices.getUserMedia(mediaConstraints);
     }
-    void answerCall() {
-      // Verifica se há uma chamada recebida
-
-      if (incomingCallStream.value.isNotEmpty) {
-        print('Atendendo chamada: ${incomingCallStream.value}');
-
-        // Restaurar o valor da stream para vazio após atender a chamada
-        incomingCallStream.value = '';
-      }
-    }
-
-    // return null;
 
     if (isCallActive.value == false) {
       // callStateChanged(
       //   Call(destino, call.session, CallStateEnum.CALL_INITIATION),
       //   CallState(callStateValue!),
       // );
-      isCallActive.value = true;
-      callDuration.value = const Duration(seconds: 0);
       startCallTimer();
-      await sipHelper!.call(destino,
-          voiceonly: voiceOnly,
-          mediaStream: mediaStream); // Enviar a chamada SIP
+      await sipHelper!.call(
+        destino,
+        voiceonly: voiceOnly,
+      ); // Enviar a chamada SIP
       sipHelper!.register();
       print('state changed');
-      callStateChanged(
-        currentCall!,
-        callState!,
-      );
+      // callStateChanged(
+      //   currentCall!,
+      //   callState!,
+      // );
 
       print('debugzoado $callStateValue');
       print('state changed done');
@@ -186,6 +178,9 @@ class DialPadController extends GetxController implements SipUaHelperListener {
   }
 
   void startCallTimer() {
+    callDuration.value = const Duration(seconds: 0);
+    isCallActive.value = true;
+
     minutes.value =
         (callDuration.value.inSeconds ~/ 60).toString().padLeft(2, '0');
     seconds.value =
@@ -208,7 +203,7 @@ class DialPadController extends GetxController implements SipUaHelperListener {
     //TODO: IMPLEMENTAR O END CALL
 
     // print(sipHelper.findCall(currentCallId!.toString()));
-    // sipHelper.findCall(currentCallId!)?.hangup();
+    sipHelper?.findCall(currentCallId!)?.hangup();
   }
 
   void endCallTimer() async {
@@ -240,6 +235,14 @@ class DialPadController extends GetxController implements SipUaHelperListener {
     await localRenderer.initialize();
     await remoteRenderer.initialize();
     // startCallTimer();
+  }
+
+  void stopCall() async {
+    // sipHelper!.findCall(currentCallId!)?.hangup()
+    // sipHelper!.removeSipUaHelperListener(this);
+    sipHelper!.findCall(caller.id!)?.hangup();
+    originatorCallStream.value = '';
+    endCallTimer();
   }
 
   void disposeRenderers() async {
@@ -297,23 +300,60 @@ class DialPadController extends GetxController implements SipUaHelperListener {
 
     switch (callState.state) {
       case CallStateEnum.STREAM:
+        print('CallStateEnum.STREAM');
+
         break;
       case CallStateEnum.ENDED:
+        print('CallStateEnum.ENDED');
+
         // disposeRenderers();
         break;
       case CallStateEnum.FAILED:
-        Get.back();
+        print('CallStateEnum.FAILED');
+        answerCall.value = false;
+        Get.snackbar(
+          'Chamada Recusada',
+          'O usuário recusou a chamada',
+          backgroundColor: defaultError,
+          colorText: defaultWhite,
+        );
+        originatorCallStream.value = '';
+        endCallTimer();
         break;
       case CallStateEnum.UNMUTED:
       case CallStateEnum.MUTED:
       case CallStateEnum.CONNECTING:
+        print('CallStateEnum.CONNECTING');
+        break;
       case CallStateEnum.PROGRESS:
+        print('CallStateEnum.PROGRESS');
+        caller = call;
+        caller.remote_display_name;
+        print('callerid = ${caller.id} e ${caller.remote_display_name}');
+        break;
       case CallStateEnum.ACCEPTED:
+        print('CallStateEnum.ACCEPTED');
+        break;
       case CallStateEnum.CONFIRMED:
+        print('CallStateEnum.CONFIRMED');
+        break;
       case CallStateEnum.HOLD:
+        print('CallStateEnum.HOLD');
+        break;
       case CallStateEnum.UNHOLD:
       case CallStateEnum.NONE:
+        print('CallStateEnum.NONE');
+        break;
       case CallStateEnum.CALL_INITIATION:
+        print('Chamada para ${originatorCallStream.value}');
+        if (originatorCallStream.value == '') {
+          print('Chamada Recebida');
+          startCallTimer();
+          Get.bottomSheet(AnswerCall() as Widget);
+        } else {
+          print('CallStateEnum.CALL_INITIATION');
+          print('Chamada enviada');
+        }
         initCall();
         // Get.toNamed('/call_screen');
         break;

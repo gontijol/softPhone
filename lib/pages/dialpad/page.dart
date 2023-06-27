@@ -178,9 +178,8 @@ class DialPadView extends GetView<DialPadController> {
                                           controller.numeroController.value),
                                     }
                                   : {
-                                      controller.endCallTimer(),
+                                      controller.stopCall(),
 
-                                      controller.isCallActive.value = false,
                                       // controller.disposeRenderers(),
                                     };
                             },
