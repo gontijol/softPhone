@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:sip_ua/sip_ua.dart';
 import 'package:smartphone/core/colors.dart';
 import 'package:smartphone/pages/call_screen/controller.dart';
+import 'package:vibration/vibration.dart';
 
 class DialPadController extends GetxController implements SipUaHelperListener {
   final incomingCallStream = ''.obs;
@@ -30,6 +31,7 @@ class DialPadController extends GetxController implements SipUaHelperListener {
 
   final RTCVideoRenderer localRenderer = RTCVideoRenderer();
   final RTCVideoRenderer remoteRenderer = RTCVideoRenderer();
+
   MediaStream? localStream;
   MediaStream? remoteStream;
   EdgeInsetsGeometry? localVideoMargin;
@@ -110,7 +112,7 @@ class DialPadController extends GetxController implements SipUaHelperListener {
     originatorCallStream.value = destino;
     bool voiceOnly = true;
     await Future.delayed(const Duration(seconds: 1));
-    MediaStream? mediaStream;
+    MediaStream mediaStream;
 
     if (kIsWeb && voiceOnly) {
       mediaStream = await mediaDevices.getDisplayMedia(mediaConstraints);
@@ -122,7 +124,13 @@ class DialPadController extends GetxController implements SipUaHelperListener {
       mediaConstraints['video'] = !voiceOnly;
       mediaStream = await mediaDevices.getUserMedia(mediaConstraints);
     }
-
+    if (!kIsWeb && voiceOnly) {
+      mediaStream = await mediaDevices.getUserMedia(mediaConstraints);
+      mediaConstraints['video'] = false;
+      MediaStream userStream =
+          await mediaDevices.getUserMedia(mediaConstraints);
+      mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
+    }
     if (isCallActive.value == false) {
       // callStateChanged(
       //   Call(destino, call.session, CallStateEnum.CALL_INITIATION),
@@ -131,7 +139,8 @@ class DialPadController extends GetxController implements SipUaHelperListener {
       startCallTimer();
       await sipHelper!.call(
         destino,
-        voiceonly: voiceOnly,
+        voiceonly: true,
+        mediaStream: mediaStream,
       ); // Enviar a chamada SIP
       sipHelper!.register();
       print('state changed');
@@ -267,6 +276,15 @@ class DialPadController extends GetxController implements SipUaHelperListener {
     resizeLocalVideo();
   }
 
+  answerIncomeCall() async {
+    // MediaStream? mediaStream;
+    // mediaStream = await mediaDevices.getUserMedia(mediaConstraints);
+    // mediaConstraints['video'] = false;
+    // MediaStream userStream = await mediaDevices.getUserMedia(mediaConstraints);
+    // mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
+    caller.answer(mediaConstraints);
+  }
+
   void resizeLocalVideo() {
     localVideoMargin = remoteStream != null
         ? const EdgeInsets.only(top: 15, right: 15)
@@ -299,6 +317,7 @@ class DialPadController extends GetxController implements SipUaHelperListener {
 
     switch (callState.state) {
       case CallStateEnum.STREAM:
+        handelStreams(callState);
         print('CallStateEnum.STREAM');
 
         break;
@@ -330,120 +349,134 @@ class DialPadController extends GetxController implements SipUaHelperListener {
         caller.remote_display_name;
         print('callerid = ${caller.id} e ${caller.remote_display_name}');
         if (originatorCallStream.value == '') {
+          Vibration.vibrate(
+            duration: 1000,
+            repeat: 5,
+            pattern: [500, 1000, 500, 2000, 500, 3000, 500, 500],
+            intensities: [0, 128, 0, 255, 0, 64, 0, 255],
+          );
+
           Get.bottomSheet(
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(30.0),
+            GestureDetector(
+              onTap: () {
+                Vibration.cancel();
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(30.0),
+                  ),
+                  color: defaultBlack.withOpacity(0.6),
                 ),
-                color: defaultBlack.withOpacity(0.6),
-              ),
-              width: Get.width,
-              height: Get.height * 0.5,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    'Chamada de ${caller.remote_display_name}',
-                    style: const TextStyle(
-                      color: defaultWhite,
-                      fontSize: 20,
+                width: Get.width,
+                height: Get.height * 0.5,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Chamada de ${caller.remote_display_name}',
+                      style: const TextStyle(
+                        color: defaultWhite,
+                        fontSize: 20,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              Get.back();
-                              caller.state == CallStateEnum.PROGRESS
-                                  ? caller.answer(mediaConstraints)
-                                  : caller.answer(mediaConstraints);
-                              caller.answer(mediaConstraints);
-                            },
-                            borderRadius: BorderRadius.circular(32.0),
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.only(top: 20, bottom: 20.0),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                width: 75,
-                                height: 75,
-                                decoration: BoxDecoration(
-                                  color: defaultLime.withOpacity(0.7),
-                                  shape: BoxShape.circle,
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        GestureDetector(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  Get.back();
+                                  Vibration.cancel();
+                                  answerIncomeCall();
+                                },
+                                borderRadius: BorderRadius.circular(32.0),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 20, bottom: 20.0),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 300),
+                                    width: 75,
+                                    height: 75,
+                                    decoration: BoxDecoration(
+                                      color: defaultLime.withOpacity(0.7),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: const Icon(
+                                      Icons.call,
+                                      size: 32.0,
+                                      color: defaultWhite,
+                                    ),
+                                  ),
                                 ),
-                                padding: const EdgeInsets.all(12.0),
-                                child: const Icon(
-                                  Icons.call,
-                                  size: 32.0,
+                              ),
+                              const SizedBox(height: 10),
+                              const Text(
+                                'Atender',
+                                style: TextStyle(
                                   color: defaultWhite,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: Get.width * 0.1),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                Get.back();
+                                stopCall();
+                                Vibration.cancel();
+                              },
+                              borderRadius: BorderRadius.circular(32.0),
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    top: 20, bottom: 20.0),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 300),
+                                  width: 75,
+                                  height: 75,
+                                  decoration: BoxDecoration(
+                                    color: defaultError.withOpacity(0.7),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: const Icon(
+                                    Icons.call_end,
+                                    size: 32.0,
+                                    color: defaultWhite,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 10),
-                          const Text(
-                            'Atender',
-                            style: TextStyle(
-                              color: defaultWhite,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(width: Get.width * 0.1),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              Get.back();
-                              stopCall();
-                            },
-                            borderRadius: BorderRadius.circular(32.0),
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.only(top: 20, bottom: 20.0),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                width: 75,
-                                height: 75,
-                                decoration: BoxDecoration(
-                                  color: defaultError.withOpacity(0.7),
-                                  shape: BoxShape.circle,
-                                ),
-                                padding: const EdgeInsets.all(12.0),
-                                child: const Icon(
-                                  Icons.call_end,
-                                  size: 32.0,
-                                  color: defaultWhite,
-                                ),
+                            const SizedBox(height: 10),
+                            const Text(
+                              'Recusar',
+                              style: TextStyle(
+                                color: defaultWhite,
+                                fontSize: 16,
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 10),
-                          const Text(
-                            'Recusar',
-                            style: TextStyle(
-                              color: defaultWhite,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
+            isDismissible: false,
           );
           print('Chamada Recebida');
           startCallTimer();
