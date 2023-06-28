@@ -86,6 +86,6 @@ Configuração necessária no Issabel - Asterisk:
     bindport=8089
     ```
 
-4.1 Ative o transporte `rtcp_mux` no ramal desejado para comunicação rtcp
+    4.1 Ative o transporte `rtcp_mux` no ramal desejado para comunicação rtcp
 
 5. Salve e reinicie o Issabel
