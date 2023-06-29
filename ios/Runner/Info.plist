@@ -4,6 +4,12 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>UIBackgroundModes</key>
+		<array>
+				<string>processing</string>
+				<string>remote-notification</string>
+				<string>voip</string>
+		</array>
 	<key>CFBundleDisplayName</key>
 	<string>Smartphone</string>
 	<key>CFBundleExecutable</key>

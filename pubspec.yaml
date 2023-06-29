@@ -50,6 +50,7 @@ dependencies:
   mask_text_input_formatter: ^2.4.0
   intl: ^0.18.1
   vibration: ^1.8.1
+  flutter_ringtone_player: ^3.2.0
   # janus_client: ^2.2.15
   # web_socket_channel: ^2.4.0
   # flutter_webrtc: ^0.9.32
@@ -85,6 +86,7 @@ flutter:
         - assets/
         - assets/images/
         - assets/images/logo-antiga.png
+        - assets/images/logo-luigi.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

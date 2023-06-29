@@ -4,6 +4,7 @@ import 'dart:async';
 // import 'dart:html';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:get/get.dart';
 import 'package:sip_ua/sip_ua.dart';
@@ -28,9 +29,10 @@ class DialPadController extends GetxController implements SipUaHelperListener {
   final minutes = ''.obs;
   final seconds = ''.obs;
   final UaSettings settings = UaSettings();
-
+  final buttonCall = true.obs;
   final RTCVideoRenderer localRenderer = RTCVideoRenderer();
   final RTCVideoRenderer remoteRenderer = RTCVideoRenderer();
+  MediaStream? mediaStream;
 
   MediaStream? localStream;
   MediaStream? remoteStream;
@@ -112,14 +114,13 @@ class DialPadController extends GetxController implements SipUaHelperListener {
     originatorCallStream.value = destino;
     bool voiceOnly = true;
     await Future.delayed(const Duration(seconds: 1));
-    MediaStream mediaStream;
 
     if (kIsWeb && voiceOnly) {
       mediaStream = await mediaDevices.getDisplayMedia(mediaConstraints);
       mediaConstraints['video'] = false;
       MediaStream userStream =
           await mediaDevices.getUserMedia(mediaConstraints);
-      mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
+      mediaStream!.addTrack(userStream.getAudioTracks()[0], addToNative: true);
     } else {
       mediaConstraints['video'] = !voiceOnly;
       mediaStream = await mediaDevices.getUserMedia(mediaConstraints);
@@ -129,7 +130,8 @@ class DialPadController extends GetxController implements SipUaHelperListener {
       mediaConstraints['video'] = false;
       MediaStream userStream =
           await mediaDevices.getUserMedia(mediaConstraints);
-      mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
+      mediaStream!.addTrack(userStream.getAudioTracks()[0], addToNative: true);
+      mediaStream!.getAudioTracks().first.enableSpeakerphone(false);
     }
     if (isCallActive.value == false) {
       // callStateChanged(
@@ -144,6 +146,10 @@ class DialPadController extends GetxController implements SipUaHelperListener {
       ); // Enviar a chamada SIP
       sipHelper!.register();
       print('state changed');
+      Future.delayed(const Duration(seconds: 2), () {
+        buttonCall.value = true;
+      });
+
       // callStateChanged(
       //   currentCall!,
       //   callState!,
@@ -158,6 +164,11 @@ class DialPadController extends GetxController implements SipUaHelperListener {
       // print('Chamada session: ${call.session}');
       // currentCallId;
     }
+  }
+
+  changeSpeaker() {
+    speakerOn.value = !speakerOn.value;
+    mediaStream!.getAudioTracks().first.enableSpeakerphone(speakerOn.value);
   }
 
   @override
@@ -215,6 +226,7 @@ class DialPadController extends GetxController implements SipUaHelperListener {
   }
 
   void endCallTimer() async {
+    buttonCall.value = true;
     _timerSubscription?.cancel();
     _timerSubscription = null;
     isCallActive.value = false;
@@ -227,15 +239,10 @@ class DialPadController extends GetxController implements SipUaHelperListener {
   }
 
   List<Contact> contacts = [
-    Contact(name: 'João', phoneNumber: '1234567890'),
-    Contact(name: 'Maria', phoneNumber: '9876543210'),
-    Contact(name: 'Pedro', phoneNumber: '5555555555'),
-    Contact(name: 'Pedro', phoneNumber: '5555555555'),
-    Contact(name: 'Pedro', phoneNumber: '5555555555'),
-    Contact(name: 'Pedro', phoneNumber: '5555555555'),
-    Contact(name: 'Pedro', phoneNumber: '5555555555'),
-    Contact(name: 'Pedro', phoneNumber: '5555555555'),
-    Contact(name: 'Pedro', phoneNumber: '5555555555'),
+    Contact(name: 'João', phoneNumber: '1000'),
+    Contact(name: 'Maria', phoneNumber: '1001'),
+    Contact(name: 'Pedro', phoneNumber: '1002'),
+    Contact(name: 'Pedro', phoneNumber: '1003'),
   ];
 
   // Métodos de manipulação de eventos SIP
@@ -245,7 +252,7 @@ class DialPadController extends GetxController implements SipUaHelperListener {
     // startCallTimer();
   }
 
-  void stopCall() async {
+  stopCall() async {
     // sipHelper!.findCall(currentCallId!)?.hangup()
     // sipHelper!.removeSipUaHelperListener(this);
     sipHelper!.findCall(caller.id!)?.hangup();
@@ -265,6 +272,7 @@ class DialPadController extends GetxController implements SipUaHelperListener {
       localRenderer.srcObject = stream;
       if (!kIsWeb && !WebRTC.platformIsDesktop) {
         event.stream?.getAudioTracks().first.enableSpeakerphone(false);
+        print('speakerphone: ${event.stream?.getAudioTracks().first}');
       }
       localStream = stream;
     }
@@ -305,6 +313,10 @@ class DialPadController extends GetxController implements SipUaHelperListener {
       return;
     }
     if (callState.state == CallStateEnum.ENDED) {
+      endCallTimer();
+
+      stopCall();
+
       return;
     }
     if (callState.state == CallStateEnum.UNMUTED) {
@@ -322,19 +334,21 @@ class DialPadController extends GetxController implements SipUaHelperListener {
 
         break;
       case CallStateEnum.ENDED:
+        endCallTimer();
         print('CallStateEnum.ENDED');
 
         // disposeRenderers();
         break;
       case CallStateEnum.FAILED:
         print('CallStateEnum.FAILED');
+
         answerCall.value = false;
-        Get.snackbar(
-          'Chamada Recusada',
-          'O usuário recusou a chamada',
-          backgroundColor: defaultError,
-          colorText: defaultWhite,
-        );
+        // Get.snackbar(
+        //   'Chamada Recusada',
+        //   'O usuário recusou a chamada',
+        //   backgroundColor: defaultError,
+        //   colorText: defaultWhite,
+        // );
         originatorCallStream.value = '';
         endCallTimer();
         break;
@@ -349,6 +363,13 @@ class DialPadController extends GetxController implements SipUaHelperListener {
         caller.remote_display_name;
         print('callerid = ${caller.id} e ${caller.remote_display_name}');
         if (originatorCallStream.value == '') {
+          FlutterRingtonePlayer.play(
+            android: AndroidSounds.notification,
+            ios: IosSounds.glass,
+            looping: true, // Android only - API >= 28
+            volume: 0.4, // Android only - API >= 28
+            asAlarm: false, // Android only - all APIs
+          );
           Vibration.vibrate(
             duration: 1000,
             repeat: 5,
@@ -360,6 +381,7 @@ class DialPadController extends GetxController implements SipUaHelperListener {
             GestureDetector(
               onTap: () {
                 Vibration.cancel();
+                FlutterRingtonePlayer.stop();
               },
               child: Container(
                 decoration: BoxDecoration(
@@ -395,6 +417,7 @@ class DialPadController extends GetxController implements SipUaHelperListener {
                                   Get.back();
                                   Vibration.cancel();
                                   answerIncomeCall();
+                                  FlutterRingtonePlayer.stop();
                                 },
                                 borderRadius: BorderRadius.circular(32.0),
                                 child: Padding(
@@ -438,6 +461,7 @@ class DialPadController extends GetxController implements SipUaHelperListener {
                                 Get.back();
                                 stopCall();
                                 Vibration.cancel();
+                                FlutterRingtonePlayer.stop();
                               },
                               borderRadius: BorderRadius.circular(32.0),
                               child: Padding(
@@ -505,6 +529,8 @@ class DialPadController extends GetxController implements SipUaHelperListener {
         // Get.toNamed('/call_screen');
         break;
       case CallStateEnum.REFER:
+        print('CallStateEnum.REFER');
+
         break;
     }
   }

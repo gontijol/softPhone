@@ -161,7 +161,7 @@ class RegisterView extends GetView<RegisterController> {
               child: Container(
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/images/background.png'),
+                    image: AssetImage('assets/images/call.jpg'),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -183,9 +183,8 @@ class RegisterView extends GetView<RegisterController> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               SizedBox(
-                                width: Get.width * 0.50,
-                                child: Image.asset(
-                                    'assets/images/logo-antiga.png'),
+                                child:
+                                    Image.asset('assets/images/logo-luigi.png'),
                               ),
                               const SizedBox(height: 40),
                               Obx(

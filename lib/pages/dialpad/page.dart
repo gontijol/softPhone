@@ -162,26 +162,34 @@ class DialPadView extends GetView<DialPadController> {
                       SizedBox(
                         width: 60.0,
                         height: 30.0,
-                        child: IconButton(
-                          onPressed: () => {print('oi')},
-                          icon: const Icon(Icons.keyboard),
-                          color: defaultWhite,
-                        ),
+                        child: Obx(() => IconButton(
+                              onPressed: () => {controller.changeSpeaker()},
+                              icon: controller.isCallActive.value
+                                  ? Icon(Icons.multitrack_audio,
+                                      color: controller.speakerOn.value
+                                          ? defaultError
+                                          : defaultWhite)
+                                  : const Icon(null),
+                              color: defaultWhite,
+                            )),
                       ),
                       Center(
                         child: Obx(() {
                           return InkWell(
                             onTap: () {
-                              controller.isCallActive.value == false
-                                  ? {
-                                      controller.fazerChamada(
-                                          controller.numeroController.value),
-                                    }
-                                  : {
-                                      controller.stopCall(),
+                              controller.buttonCall.value == true
+                                  ? controller.isCallActive.value == false
+                                      ? {
+                                          controller.buttonCall.value = false,
+                                          controller.fazerChamada(controller
+                                              .numeroController.value),
+                                        }
+                                      : {
+                                          controller.stopCall(),
 
-                                      // controller.disposeRenderers(),
-                                    };
+                                          // controller.disposeRenderers(),
+                                        }
+                                  : null;
                             },
                             borderRadius: BorderRadius.circular(32.0),
                             child: Padding(
@@ -243,11 +251,26 @@ class DialPadView extends GetView<DialPadController> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              defaultBlack,
-              defaultCyan.withOpacity(0.01),
+              defaultBlack.withAlpha(80),
+              defaultCyan.withOpacity(0.1),
             ],
           ),
+          // image: const DecorationImage(
+          //   image: AssetImage('assets/images/call.jpg'),
+          //   opacity: 0.05,
+          //   fit: BoxFit.cover,
+          // ),
         ),
+        // decoration: BoxDecoration(
+        //   gradient: LinearGradient(
+        //     begin: Alignment.topCenter,
+        //     end: Alignment.bottomCenter,
+        //     colors: [
+        //       defaultBlack,
+        //       defaultCyan.withOpacity(0.01),
+        //     ],
+        //   ),
+        // ),
       ),
     );
   }
@@ -280,109 +303,76 @@ class DialPadView extends GetView<DialPadController> {
           child: IconButton(
               onPressed: () {
                 Get.bottomSheet(
-                  Container(
-                    color: Colors.transparent,
-                    width: Get.width,
-                    height: Get.height,
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 200),
-                        child: Container(
-                          padding: const EdgeInsets.all(16.0),
-                          width: Get.width / 1.2,
-                          height: Get.height / 2.0,
-                          decoration: BoxDecoration(
-                            color: defaultBlack.withOpacity(0.22),
-                            borderRadius: BorderRadius.circular(16.0),
+                  Opacity(
+                    opacity: 0.92,
+                    child: Container(
+                      width: Get.width,
+                      color: defaultCyan,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Text(
+                              'Lista de Contatos',
+                              style: TextStyle(
+                                color: defaultBlack,
+                                fontSize: 24.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
-                          child: const Row(
-                            children: [
-                              Column(children: [
-                                Text(
-                                  'Fulano chamando',
-                                  style: TextStyle(
-                                    color: defaultWhite,
-                                    fontSize: 24.0,
-                                    fontWeight: FontWeight.bold,
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: controller.contacts.length,
+                              itemBuilder: (context, index) {
+                                final contact = controller.contacts[index];
+
+                                return ListTile(
+                                  title: Text(
+                                    contact.name,
+                                    style: const TextStyle(
+                                      color: defaultBlack,
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                              ]),
-                            ],
+                                  subtitle: Text(
+                                    contact.phoneNumber,
+                                    style: const TextStyle(
+                                      color: defaultBlack,
+                                      fontSize: 12.0,
+                                      fontWeight: FontWeight.w300,
+                                    ),
+                                  ),
+                                  isThreeLine: true,
+                                  trailing: IconButton(
+                                    onPressed: () {
+                                      Get.back();
+                                      controller
+                                          .fazerChamada(contact.phoneNumber);
+
+                                      // Ação a ser executada ao selecionar um contato
+                                      print(
+                                          'Contato selecionadosss: ${contact.name}');
+                                    },
+                                    icon: const Icon(Icons.call),
+                                    color: defaultBlack,
+                                  ),
+                                  onTap: () {
+                                    // Ação a ser executada ao selecionar um contato
+                                    print(
+                                        'Contato selecionado: ${contact.name}');
+                                  },
+                                );
+                              },
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ),
-                  isDismissible: false,
                 );
-
-                // Get.bottomSheet(
-                //   Opacity(
-                //     opacity: 0.92,
-                //     child: Container(
-                //       width: Get.width,
-                //       color: defaultCyan,
-                //       child: Column(
-                //         crossAxisAlignment: CrossAxisAlignment.stretch,
-                //         children: [
-                //           const Padding(
-                //             padding: EdgeInsets.all(16.0),
-                //             child: Text(
-                //               'Lista de Contatos',
-                //               style: TextStyle(
-                //                 color: defaultBlack,
-                //                 fontSize: 24.0,
-                //                 fontWeight: FontWeight.bold,
-                //               ),
-                //             ),
-                //           ),
-                //           Expanded(
-                //             child: ListView.builder(
-                //               itemCount: controller.contacts.length,
-                //               itemBuilder: (context, index) {
-                //                 final contact = controller.contacts[index];
-
-                //                 return ListTile(
-                //                   title: Text(
-                //                     contact.name,
-                //                     style: const TextStyle(
-                //                       color: defaultBlack,
-                //                       fontSize: 18.0,
-                //                       fontWeight: FontWeight.bold,
-                //                     ),
-                //                   ),
-                //                   subtitle: Text(
-                //                     contact.phoneNumber,
-                //                     style: const TextStyle(
-                //                       color: defaultBlack,
-                //                       fontSize: 12.0,
-                //                       fontWeight: FontWeight.w300,
-                //                     ),
-                //                   ),
-                //                   isThreeLine: true,
-                //                   trailing: IconButton(
-                //                     onPressed: () {
-                //                       // Ação a ser executada ao selecionar um contato
-                //                       print(
-                //                           'Contato selecionadosss: ${contact.name}');
-                //                     },
-                //                     icon: const Icon(Icons.call),
-                //                     color: defaultBlack,
-                //                   ),
-                //                   onTap: () {
-                //                     // Ação a ser executada ao selecionar um contato
-                //                     print(
-                //                         'Contato selecionado: ${contact.name}');
-                //                   },
-                //                 );
-                //               },
-                //             ),
-                //           ),
-                //         ],
-                //       ),
-                //     ),
-                //   ),
-                // );
               },
               iconSize: 40,
               icon: const Icon(Icons.contacts),
