@@ -86,7 +86,7 @@ Configuração necessária no Issabel - Asterisk:
     bindport=8089
     ```
     
-4.1 procure pelo arquivo pjsip_custom.conf e Defina seu IP
+4. procure pelo arquivo pjsip_custom.conf e Defina seu IP
 
     ```
     type=transport
@@ -94,6 +94,9 @@ Configuração necessária no Issabel - Asterisk:
     bind=0.0.0.0
     ; All other transport parameters are ignored for wss transports.
     ```
+5. Caso ambos arquivos estejam somente leitura, você poderá criar arquivos personalizados
+
+exemplo: `pjsip_custom_2.conf` e `http_custom_2.conf`, dessa forma, basta incluir seus respectivos códigos acima, e incluir nos arquivos `pjsip.conf` e `http.conf` seus respctivos includes.
     
 5. Ative o transporte `rtcp_mux` no ramal desejado para comunicação rtcp
 
