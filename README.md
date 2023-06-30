@@ -90,7 +90,7 @@ Configuração necessária no Issabel - Asterisk:
 
     ```
     type=transport
-    protocol=wss
+    protocol=ws
     bind=0.0.0.0
     ; All other transport parameters are ignored for wss transports.
     ```
