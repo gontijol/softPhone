@@ -69,6 +69,8 @@ Contribuições são bem-vindas! Se você quiser melhorar este projeto, siga as 
 
 ## Atualização 0.1.0
 
+https://www.fop2.com/docs/webrtc_guide.php#WebRTCConfigurationguide
+
 Removida abstração de camada desnecessária Jssip
 
 Configuração necessária no Issabel - Asterisk:
