@@ -83,6 +83,7 @@ Configuração necessária no Issabel - Asterisk:
     bindaddr=[SEU IP ESTÁTICO]
     bindport=8089
     ```
+    
 4.1 procure pelo arquivo pjsip_custom.conf e Defina seu IP
 
     ```
@@ -91,6 +92,7 @@ Configuração necessária no Issabel - Asterisk:
     bind=0.0.0.0
     ; All other transport parameters are ignored for wss transports.
     ```
+    
 5. Ative o transporte `rtcp_mux` no ramal desejado para comunicação rtcp
 
 6. Salve e reinicie o Issabel
