@@ -101,3 +101,23 @@ exemplo: `pjsip_custom_2.conf` e `http_custom_2.conf`, dessa forma, basta inclui
 5. Ative o transporte `rtcp_mux` no ramal desejado para comunicação rtcp
 
 6. Salve e reinicie o Issabel
+
+
+
+## Atualização 0.2.0
+
+Caso o issabel esteja bloqueando conexões com erro 500, siga os seguintes passos:
+no arquivo pjsip_user.conf ou pjsip_custom.conf adicione o seguinte parâmetro : 
+```
+    bindport=8089
+```
+
+1. Vá em Segurança > Firewall > Define Ports e defina uma nova porta
+```
+    Nome: WS
+    Protocolo: TCP
+    Porta : 8080 > 8089
+````
+feito isso basta salvar o arquivo.
+
+2. Vá em Segurança > Firewall > Port Knocking Users e autorize um novo usuário com as portas:  ``SIP WS HTTP HTTPS``
