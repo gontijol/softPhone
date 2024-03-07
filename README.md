@@ -121,3 +121,5 @@ no arquivo pjsip_user.conf ou pjsip_custom.conf adicione o seguinte parâmetro :
 feito isso basta salvar o arquivo.
 
 2. Vá em Segurança > Firewall > Port Knocking Users e autorize um novo usuário com as portas:  ``SIP WS HTTP HTTPS``
+
+3. 
